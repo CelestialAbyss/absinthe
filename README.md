@@ -1,11 +1,11 @@
-# The Universalator
-
-A modified version of Universalator with the default blue background removed. 
-
+# Abyss Universalator
 An all in one modded Minecraft Server installation & server launching script file!
 
-<ins>**[To view the official Wiki and convenient download links - click here.](https://github.com/nanonestor/universalator/wiki)**</ins>  
+## Notice
+This is an unofficial fork of Universalator with the default blue background removed.
 
+To view the official Wiki and convenient download links, [click here.](https://github.com/nanonestor/universalator/wiki)
 
-To view code - navigate the 'branches' drop box above.  Click on files to view their code.
+To view code - navigate the 'branches' drop box above.
+- If you need to use it, simply download the file from the repository.
 
