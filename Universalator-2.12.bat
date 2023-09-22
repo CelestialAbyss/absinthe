@@ -79,7 +79,7 @@ PUSHD "%~dp0" >nul 2>&1
 
 :: Sets the title and backgound color of the command window
 TITLE Universalator
-color 1E
+color 0E
 prompt [universalator]:
 :: Additional JVM arguments that will always be applied
 SET OTHERARGS=-Dlog4j2.formatMsgNoLookups=true
@@ -113,7 +113,7 @@ IF %major% LEQ 9 (
 )
 IF %major% GEQ 10 (
   SET yellow=[34;103m
-  SET blue=[93;44m
+  SET blue=[93;40m
   SET green=[93;42m
   SET red=[93;101m
 )
