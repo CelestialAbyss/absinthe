@@ -79,7 +79,7 @@ PUSHD "%~dp0" >nul 2>&1
 
 :: Sets the title and backgound color of the command window
 TITLE Universalator
-color 1E
+color 0E
 prompt [universalator]:
 :: Additional JVM arguments that will always be applied
 SET OTHERARGS=-Dlog4j2.formatMsgNoLookups=true
@@ -106,7 +106,7 @@ for /f "tokens=4-7 delims=[.] " %%i in ('ver') do (if %%i==Version (
 :: If Windows is greater than or equal to version 10 then set some variables to set console output colors!  Then skip OS warning.
 IF %major% GEQ 10 (
   SET yellow=[34;103m
-  SET blue=[93;44m
+  SET blue=[93;40m
   SET green=[93;42m
   SET red=[93;101m
   GOTO :skipwin
