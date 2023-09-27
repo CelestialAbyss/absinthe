@@ -1,4 +1,4 @@
-# Abyss Universalator
+# Absinthe
 An all in one modded Minecraft Server installation & server launching script file!
 
 ## Notice
