@@ -136,7 +136,6 @@ litematica
 llor
 loadmyresources
 lock_minecart_view
-lod
 lootbeams
 loot_journal
 magnesium
