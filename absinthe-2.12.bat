@@ -1576,7 +1576,7 @@ IF EXIST univ-utils\allmodidsandfiles.txt DEL univ-utils\allmodidsandfiles.txt
 
   REM Gets the client only list from github file, checks if it's empty or not after download attempt, then sends
   REM to a new file masterclientids.txt with any blank lines removed.
-  powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/nanonestor/utilities/main/clientonlymods.txt', 'univ-utils/clientonlymods.txt')" >nul
+  powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/CelestialAbyss/absinthe/main/clientonlymods.txt', 'univ-utils/clientonlymods.txt')" >nul
 
 
   REM Checks if the just downloaded file's first line is empty or not.  Better never save that webfile with the first line empty!
@@ -1589,7 +1589,7 @@ IF EXIST univ-utils\allmodidsandfiles.txt DEL univ-utils\allmodidsandfiles.txt
     ECHO   SOMETHING WENT WRONG DOWNLOADING THE MASTER CLIENT-ONLY LIST FROM THE GITHUB HOSTED LIST
     ECHO   CHECK THAT YOU HAVE NO ANTIVIRUS PROGRAM OR WINDOWS DEFENDER BLOCKING THE DOWNLOAD FROM -
     ECHO:
-    ECHO   https://raw.githubusercontent.com/nanonestor/utilities/main/clientonlymods.txt
+    ECHO   https://raw.githubusercontent.com/CelestialAbyss/absinthe/main/clientonlymods.txt
     ECHO:
     PAUSE && EXIT [\B]
   )
