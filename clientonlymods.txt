@@ -89,6 +89,7 @@ enchdesc
 entitycollisionfpsfix
 entityculling
 equipmentcompare
+essential
 extremesoundmuffler
 fallingleaves
 fancymenu
