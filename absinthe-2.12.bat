@@ -1791,7 +1791,7 @@ GOTO:EOF
   ECHO: & ECHO:
   ECHO      - IF YOU THINK THE CURRENT MASTER LIST IS INNACURATE OR HAVE FOUND A MOD TO ADD -
   ECHO         PLEASE CONTACT THE LAUNCHER AUTHOR OR
-  ECHO         FILE AN ISSUE AT https://github.com/nanonestor/absinthe/issues !
+  ECHO         FILE AN ISSUE AT https://github.com/CelestialAbyss/absinthe/issues !
   ECHO:
   :typo
   ECHO    ------------------------------------------------------ & ECHO:
