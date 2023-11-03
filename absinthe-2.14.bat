@@ -1,6 +1,6 @@
 @ECHO OFF
 
-REM    The Uuniversalator - Modded Minecraft Server Installation / Launching Program.
+REM    The Universalator - Modded Minecraft Server Installation / Launching Program.
 REM    Copyright (C) <2023>  <Kerry Sherwin>
 REM
 REM    This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ REM    along with this program.  If not, see https://www.gnu.org/licenses/.
   ::    1- ONLY DO FOLLOWING AFTER SUCCESSFULLY LAUNCHING A SERVER AT LEAST ONCE ALL THE WAY TO WORLD CREATION - THIS GUARANTEES FILES AT LEAST WORK TO THAT POINT
   ::    3- CREATE A ZIP FILE CONTAINING:  
   ::        A- THIS BAT
-  ::        B- settings-absinthe.txt
+  ::        B- settings-universalator.txt
   ::        C- THE 'MODS' FOLDER
   ::        D- ANY OTHER SPECIAL FOLDERS/FILES WANTED (FOR EXAMPLE THE 'CONFIGS' AND 'DEFAULTCONFIGS' FOLDERS).
   ::      DO NOT INCLUDE MODLOADER / MINECRAFT FILES/FOLDERS.  'DO NOT INCLUDE' EXAMPLES- LIBRARIES, .FABRIC, server.jar
@@ -146,7 +146,7 @@ IF DEFINED _JAVA_OPTIONS (
     ECHO  %yellow% PLEASE REMOVE THIS VALUE FROM THE VARIABLE SO THAT YOUR SERVER WILL LAUNCH CORRECTLY! %blue%
     ECHO:
     ECHO  IF YOU DON'T KNOW HOW - SEE THE UNIVERSALATOR WIKI / TROUBLESHOOTING AT:
-    ECHO  https://github.com/nanonestor/absinthe/wiki
+    ECHO  https://github.com/nanonestor/universalator/wiki
     ECHO:
     PAUSE && EXIT [\B]
   )
@@ -165,7 +165,7 @@ IF DEFINED JDK_JAVA_OPTIONS (
     ECHO  %yellow% PLEASE REMOVE THIS VALUE FROM THE VARIABLE SO THAT YOUR SERVER WILL LAUNCH CORRECTLY! %blue%
     ECHO:
     ECHO  IF YOU DON'T KNOW HOW - SEE THE UNIVERSALATOR WIKI / TROUBLESHOOTING AT:
-    ECHO  https://github.com/nanonestor/absinthe/wiki
+    ECHO  https://github.com/nanonestor/universalator/wiki
     ECHO:
     PAUSE && EXIT [\B]
   )
@@ -184,7 +184,7 @@ IF DEFINED JAVA_TOOL_OPTIONS (
     ECHO  %yellow% PLEASE REMOVE THIS VALUE FROM THE VARIABLE SO THAT YOUR SERVER WILL LAUNCH CORRECTLY! %blue%
     ECHO:
     ECHO  IF YOU DON'T KNOW HOW - SEE THE UNIVERSALATOR WIKI / TROUBLESHOOTING AT:
-    ECHO  https://github.com/nanonestor/absinthe/wiki
+    ECHO  https://github.com/nanonestor/universalator/wiki
     ECHO:
     PAUSE && EXIT [\B]
   )
@@ -204,11 +204,10 @@ IF %LASTCHAR%==")" (
   PAUSE && EXIT [\B]
 )
 
-:: The below SET PATH only applies to this command window launch and isn't permanent to the system's PATH.
-SET PATH=%PATH%;"C:\Windows\system32\"
-SET PATH=%PATH%;"C:\Windows\Syswow64\"
 
 :: Checks to see if CMD is working by checking WHERE for some commands
+:testcmdagain
+
 WHERE FINDSTR >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 SET CMDBROKEN=Y
 WHERE CERTUTIL >nul 2>&1
@@ -222,6 +221,15 @@ IF %ERRORLEVEL% NEQ 0 SET CMDBROKEN=Y
 WHERE TAR >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 SET CMDBROKEN=Y
 
+:: The below SET PATH only applies to this command window launch and isn't permanent to the system's PATH.
+:: It's only done if the above tests fail, after the second round of tests if still fail prompt user with message.
+
+IF DEFINED CMDBROKEN IF !CMDBROKEN!==Y IF NOT DEFINED CMDFIX (
+  SET "PATH=%PATH%C:\Windows\System32;"
+  SET "PATH=%PATH%C:\Windows\SysWOW64;"
+  SET CMDFIX=TRIED
+  GOTO :testcmdagain
+)
 IF DEFINED CMDBROKEN IF !CMDBROKEN!==Y (
   ECHO:
   ECHO        %yellow% WARNING - PROBLEM DETECTED %blue%
@@ -230,7 +238,7 @@ IF DEFINED CMDBROKEN IF !CMDBROKEN!==Y (
   ECHO             FOR REPAIR SOLUTIONS
   ECHO             SEE THE UNIVERSALATOR WIKI / TROUBLESHOOTING AT:
   ECHO:
-  ECHO             https://github.com/nanonestor/absinthe/wiki
+  ECHO             https://github.com/nanonestor/universalator/wiki
   ECHO:
   ECHO             or
   ECHO             Web search for fixing / repairing Windows Command prompt function.
@@ -241,23 +249,25 @@ IF DEFINED CMDBROKEN IF !CMDBROKEN!==Y (
   PAUSE && EXIT [\B]
 )
 
-:: Checks to see if Powershell is installed.  If not recognized as command or exists as file it will send a message to install.
-:: If exists as file then the path is simply not set and the ELSE sets it for this script run.
+:: Checks to see if Powershell is installed.  If the powershell command isn't found then an attempt is made to add it to the path for this command window session.
+:: If still not recognized as command user is prompted with a message about the problem.
 
 WHERE powershell >nul 2>&1
-IF %ERRORLEVEL% NEQ 0 IF NOT EXIST "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" (
+IF %ERRORLEVEL% NEQ 0 SET "PATH=%PATH%C:\Windows\System32\WindowsPowerShell\v1.0\;"
+ver >nul
+WHERE powershell >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
   ECHO:
-  ECHO   Uh oh - POWERSHELL is not detected as installed to your system.
-  ECHO:
+  ECHO   Uh oh - POWERSHELL is not detected as installed to your system - or not installed correctly to system PATH.
+  ECHO:          
   ECHO   'Microsoft Powershell' is required for this program to function.
   ECHO   Web search to find an installer for this product!
   ECHO:
   ECHO   FOR ADDITIONAL INFORMATION - SEE THE UNIVERSALATOR WIKI / TROUBLESHOOTING AT:
-  ECHO   https://github.com/nanonestor/absinthe/wiki
-  ECHO:
+  ECHO   https://github.com/nanonestor/universalator/wiki
+  ECHO: & ECHO:
   PAUSE && EXIT [\B]
-
-) ELSE SET PATH=%PATH%;"C:\Windows\System32\WindowsPowerShell\v1.0\"
+)
 
 :: This is to fix an edge case issue with folder paths ending in ).  Yes this is worked on already above - including this anyways!
 SET LOC=%cd:)=]%
@@ -295,8 +305,8 @@ ECHO: && ECHO ------------------------------------------------------------------
 :: The following line is purely done to guarantee the current ERRORLEVEL is reset
 ver >nul
 
-IF EXIST settings-absinthe.txt (
-  RENAME settings-absinthe.txt settings-absinthe.bat && CALL settings-absinthe.bat && RENAME settings-absinthe.bat settings-absinthe.txt
+IF EXIST settings-universalator.txt (
+  RENAME settings-universalator.txt settings-universalator.bat && CALL settings-universalator.bat && RENAME settings-universalator.bat settings-universalator.txt
 )
 IF /I !MODLOADER!==FORGE SET FORGE=!MODLOADERVERSION!
 IF /I !MODLOADER!==NEOFORGE SET NEOFORGE=!MODLOADERVERSION!
@@ -543,15 +553,15 @@ IF NOT DEFINED LOCALIP (
 
 
 :: If no settings file exists yet then go directly to entering settings (first setting being Minecraft version)
-IF NOT EXIST settings-absinthe.txt GOTO :startover
+IF NOT EXIST settings-universalator.txt GOTO :startover
 
 :: BEGIN MAIN MENU
 
 :mainmenu
 
-TITLE Absinthe
-IF EXIST settings-absinthe.txt (
-  RENAME settings-absinthe.txt settings-absinthe.bat && CALL settings-absinthe.bat && RENAME settings-absinthe.bat settings-absinthe.txt
+TITLE Universalator
+IF EXIST settings-universalator.txt (
+  RENAME settings-universalator.txt settings-universalator.bat && CALL settings-universalator.bat && RENAME settings-universalator.bat settings-universalator.txt
   IF DEFINED MAXRAMGIGS IF !MAXRAMGIGS! NEQ "" SET MAXRAM=-Xmx!MAXRAMGIGS!G
   IF /I !MODLOADER!==FORGE SET FORGE=!MODLOADERVERSION!
   IF /I !MODLOADER!==NEOFORGE SET NEOFORGE=!MODLOADERVERSION!
@@ -564,8 +574,8 @@ SET "MAINMENU="
 CLS
 ECHO:%yellow%
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-ECHO    Based on Universalator by nanonestor                                             
+ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+ECHO    Based on Universalator by nanonestor                                        
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
 ECHO:
 ECHO   %yellow% CURRENT SETTINGS %blue%
@@ -592,9 +602,9 @@ IF NOT EXIST "%HERE%\univ-utils\miniupnp\upnpc-static.exe" ECHO   %yellow% UPNP 
 IF EXIST "%HERE%\univ-utils\miniupnp\upnpc-static.exe" ECHO   %yellow% UPNP PROGRAM (MINIUPNP) %blue%   LOADED
 IF EXIST "%HERE%\univ-utils\miniupnp\upnpc-static.exe" IF !ISUPNPACTIVE!==N ECHO   %yellow% UPNP STATUS %blue%       %red% NOT ACTIVATED %blue%
 IF EXIST "%HERE%\univ-utils\miniupnp\upnpc-static.exe" IF !ISUPNPACTIVE!==Y  ECHO   %yellow% UPNP STATUS %blue%  %green% ACTIVE - FORWARDING PORT %PORT% %blue%
-IF EXIST settings-absinthe.txt ECHO                                                           %green% L %blue% = LAUNCH SERVER
-IF NOT EXIST settings-absinthe.txt ECHO                                                           %green% S %blue% = SETTINGS ENTRY
-IF EXIST settings-absinthe.txt ECHO                                                           %green% S %blue% = RE-ENTER ALL SETTINGS
+IF EXIST settings-universalator.txt ECHO                                                           %green% L %blue% = LAUNCH SERVER
+IF NOT EXIST settings-universalator.txt ECHO                                                           %green% S %blue% = SETTINGS ENTRY
+IF EXIST settings-universalator.txt ECHO                                                           %green% S %blue% = RE-ENTER ALL SETTINGS
 ECHO                                                           %green% R %blue% = SET (ONLY)RAM MAXIMUM
 ECHO                                                           %green% J %blue% = SET (ONLY) JAVA VERSION
 ECHO                                                           %green% UPNP %blue% = UPNP PORT FORWARDING MENU
@@ -608,7 +618,7 @@ IF /I !MAINMENU!==J GOTO :getmcmajor
 IF /I !MAINMENU!==UPNP GOTO :upnpmenu
 IF /I !MAINMENU!==R GOTO :justsetram
 IF /I !MAINMENU!==S GOTO :startover
-IF /I !MAINMENU!==L IF EXIST settings-absinthe.txt IF DEFINED MINECRAFT IF DEFINED MODLOADER IF DEFINED JAVAVERSION GOTO :actuallylaunch
+IF /I !MAINMENU!==L IF EXIST settings-universalator.txt IF DEFINED MINECRAFT IF DEFINED MODLOADER IF DEFINED JAVAVERSION GOTO :actuallylaunch
 IF /I !MAINMENU!==SCAN IF EXIST "%HERE%\mods" GOTO :getmcmajor
 IF /I !MAINMENU!==SCAN IF NOT EXIST "%HERE%\mods" GOTO :mainmenu
 IF /I !MAINMENU!==OVERRIDE GOTO :override
@@ -624,8 +634,8 @@ GOTO :mainmenu
 CLS
 ECHO:%yellow%
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-ECHO    Based on Universalator by nanonestor                                             
+ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+ECHO    Based on Universalator by nanonestor                                        
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
 ECHO: & ECHO: & ECHO:
 ECHO:    %green% S %blue% = RE-ENTER ALL SETTINGS
@@ -651,11 +661,11 @@ GOTO :mainmenu
 :startover
 :: User entry for Minecraft version
 CLS
-IF NOT EXIST settings-absinthe.txt (
+IF NOT EXIST settings-universalator.txt (
 ECHO:%yellow%
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-ECHO    Based on Universalator by nanonestor                                             
+ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+ECHO    Based on Universalator by nanonestor                                        
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
 ECHO: & ECHO:
 ECHO    %green% Settings can be changed from main menu once all initial settings have been entered %blue%
@@ -698,11 +708,11 @@ IF /I !MAINMENU!==J GOTO :gojava
 :reentermodloader
 :: User entry for Modloader version
 CLS
-IF NOT EXIST settings-absinthe.txt (
+IF NOT EXIST settings-universalator.txt (
 ECHO:%yellow%
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-ECHO    Based on Universalator by nanonestor                                             
+ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+ECHO    Based on Universalator by nanonestor                                        
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
 ECHO: & ECHO:
 ECHO    %green% Settings can be changed from main menu once all settings have been entered %blue%
@@ -733,7 +743,7 @@ IF /I !MODLOADER! NEQ FORGE IF /I !MODLOADER! NEQ FABRIC IF /I !MODLOADER! NEQ N
 
 
 :: Detects if settings are trying to use some weird old Minecraft Forge version that isn't supported.
-:: This is done again later after the settings-absinthe.txt is present and this is section is skipped.
+:: This is done again later after the settings-universalator.txt is present and this is section is skipped.
 IF /I !MODLOADER!==FORGE IF !MCMAJOR! LSS 10 IF !MINECRAFT! NEQ 1.6.4 IF !MINECRAFT! NEQ 1.7.10 IF !MINECRAFT! NEQ 1.8.9 IF !MINECRAFT! NEQ 1.9.4 (
   CLS
   ECHO: & ECHO: & ECHO: & ECHO:
@@ -758,11 +768,11 @@ IF /I !MODLOADER!==VANILLA GOTO :fabricandquiltandvanillaram
 IF /I !MODLOADER!==FABRIC (
 FOR /F %%A IN ('powershell -Command "$url = 'https://maven.fabricmc.net/net/fabricmc/fabric-loader/maven-metadata.xml'; $data =[xml](New-Object System.Net.WebClient).DownloadString($url); $data.metadata.versioning.release"') DO SET FABRICLOADER=%%A
   CLS
-  IF NOT EXIST settings-absinthe.txt (
+  IF NOT EXIST settings-universalator.txt (
   ECHO:%yellow%
   ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-  ECHO    Based on Universalator by nanonestor                                             
+  ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+  ECHO    Based on Universalator by nanonestor                                        
   ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
   ECHO: & ECHO:
   ECHO    %green% Settings can be changed from main menu once all settings have been entered %blue%
@@ -805,11 +815,11 @@ GOTO :oopsnovalidfabricqulit
 FOR /F %%A IN ('powershell -Command "$url = 'https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-loader/maven-metadata.xml'; $data =[xml](New-Object System.Net.WebClient).DownloadString($url); $data.metadata.versioning.release"') DO SET QUILTLOADER=%%A
   :redoenterquilt
   CLS
-  IF NOT EXIST settings-absinthe.txt (
+  IF NOT EXIST settings-universalator.txt (
   ECHO:%yellow%
   ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-  ECHO    Based on Universalator by nanonestor                                             
+  ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+  ECHO    Based on Universalator by nanonestor                                        
   ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
   ECHO: & ECHO:
   ECHO    %green% Settings can be changed from main menu once all settings have been entered %blue%
@@ -882,9 +892,15 @@ IF /I !MODLOADER!==FORGE (
 :: If Neoforge get newest Forge version available of the selected minecraft version.
 IF /I !MODLOADER!==NEOFORGE (
   SET "NEWESTNEOFORGE="
-  FOR /F "tokens=1,2 delims=-" %%A IN ('powershell -Command "$url = 'https://maven.neoforged.net/releases/net/neoforged/forge/maven-metadata.xml'; $data =[xml](New-Object System.Net.WebClient).DownloadString($url); $data.metadata.versioning.versions.version"') DO (
+  IF !MINECRAFT!==1.20.1 FOR /F "tokens=1,2 delims=-" %%A IN ('powershell -Command "$url = 'https://maven.neoforged.net/releases/net/neoforged/forge/maven-metadata.xml'; $data =[xml](New-Object System.Net.WebClient).DownloadString($url); $data.metadata.versioning.versions.version"') DO (
     IF %%A==%MINECRAFT% (
         SET NEWESTNEOFORGE=%%B
+    )
+  )
+  IF !MINECRAFT! NEQ 1.20.1 FOR /F "tokens=1-4 delims=.-" %%A IN ('powershell -Command "$url = 'https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml'; $data =[xml](New-Object System.Net.WebClient).DownloadString($url); $data.metadata.versioning.versions.version"') DO (
+    IF %%A==%MCMAJOR% IF %%B==%MCMINOR% (
+        SET NEWESTNEOFORGE=%%A.%%B.%%C
+        IF %%D NEQ "" SET NEWESTNEOFORGE=!NEWESTNEOFORGE!-%%D
     )
   )
   IF "!NEWESTNEOFORGE!" EQU "" (
@@ -898,11 +914,11 @@ IF /I !MODLOADER!==NEOFORGE (
 
 :redoenterforge
 CLS
-IF NOT EXIST settings-absinthe.txt (
+IF NOT EXIST settings-universalator.txt (
   ECHO:%yellow%
   ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-  ECHO    Based on Universalator by nanonestor                                             
+  ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+  ECHO    Based on Universalator by nanonestor                                        
   ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
   ECHO: & ECHO:
   ECHO    %green% Settings can be changed from main menu once all settings have been entered %blue%
@@ -936,7 +952,7 @@ IF "!FROGEENTRY!" NEQ "!FROGEENTRY: =!" GOTO :redoenterforge
 :: Checks to see if there were any a-z or A-Z characters in the entry.
 ECHO:
 SET FORGEENTRYCHECK=IDK
-ECHO !FROGEENTRY! | FINDSTR "[a-z] [A-Z]" && SET FORGEENTRYCHECK=LETTER
+IF !MODLOADER!==FORGE ECHO !FROGEENTRY! | FINDSTR "[a-z] [A-Z]" && SET FORGEENTRYCHECK=LETTER
  IF !FORGEENTRYCHECK!==IDK (
     IF /I !MODLOADER!==FORGE SET FORGE=!FROGEENTRY!
     IF /I !MODLOADER!==NEOFORGE SET NEOFORGE=!FROGEENTRY!
@@ -953,9 +969,14 @@ IF /I !MODLOADER!==FORGE (
     IF %%A==!MINECRAFT! IF %%B==!FROGEENTRY! GOTO :foundvalidforgeversion
     )
 )
-IF /I !MODLOADER!==NEOFORGE (
+IF /I !MODLOADER!==NEOFORGE IF !MINECRAFT!==1.20.1 (
   FOR /F "tokens=1,2 delims=-" %%A IN ('powershell -Command "$url = 'https://maven.neoforged.net/releases/net/neoforged/forge/maven-metadata.xml'; $data =[xml](New-Object System.Net.WebClient).DownloadString($url); $data.metadata.versioning.versions.version"') DO (
     IF %%A==!MINECRAFT! IF %%B==!FROGEENTRY! GOTO :foundvalidforgeversion
+  )
+)
+IF /I !MODLOADER!==NEOFORGE IF !MINECRAFT! NEQ 1.20.1 (
+  FOR /F "tokens=1-3 delims=." %%A IN ('powershell -Command "$url = 'https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml'; $data =[xml](New-Object System.Net.WebClient).DownloadString($url); $data.metadata.versioning.versions.version"') DO (
+    IF %%A==%MCMAJOR% IF %%B==%MCMINOR% IF !FROGEENTRY!==%%A.%%B.%%C  GOTO :foundvalidforgeversion
   )
 )
 :: If no valid version was detected on the maven file server XML list then no skip ahead was done to the foundvalidforgeversion label - display error and go back to enter another version
@@ -980,11 +1001,11 @@ IF /I !MODLOADER!==QUILT GOTO :fabricandquiltandvanillaram
 IF DEFINED OVERRIDE SET OVERRIDE=N
 :: This section is for Forge and Neoforge Java setting
 CLS
-IF NOT EXIST settings-absinthe.txt (
+IF NOT EXIST settings-universalator.txt (
   ECHO:%yellow%
   ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-  ECHO    Based on Universalator by nanonestor                                             
+  ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+  ECHO    Based on Universalator by nanonestor                                        
   ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
   ECHO: & ECHO:
   ECHO    %green% Settings can be changed from main menu once all settings have been entered %blue%
@@ -1061,11 +1082,11 @@ IF /I !MODLOADER!==NEOFORGE GOTO :skipthatram
 :fabricandquiltandvanillaram
 
   CLS
-  IF NOT EXIST settings-absinthe.txt (
+  IF NOT EXIST settings-universalator.txt (
     ECHO:%yellow%
     ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher         
-    ECHO    Based on Universalator by nanonestor                                             
+    ECHO    Welcome to the Absinthe - A modded Minecraft server installer / launcher    
+    ECHO    Based on Universalator by nanonestor                                        
     ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%blue%
     ECHO: & ECHO:
     ECHO    %green% Settings can be changed from main menu once all settings have been entered %blue%
@@ -1171,40 +1192,40 @@ IF !JAVAVERSION! NEQ 8 IF !JAVAVERSION! NEQ 11 IF !JAVAVERSION! NEQ 16 IF !JAVAV
 )
 
 IF /I !MAINMENU!==L SET ASKMODSCHECK=N
-IF NOT EXIST settings-absinthe.txt (
+IF NOT EXIST settings-universalator.txt (
   SET MAINMENU=S
   SET ASKMODSCHECK=Y
 )
 :setconfig
-:: Generates settings-absinthe.txt file if settings-absinthe.txt does not exist
-IF EXIST settings-absinthe.txt DEL settings-absinthe.txt
+:: Generates settings-universalator.txt file if settings-universalator.txt does not exist
+IF EXIST settings-universalator.txt DEL settings-universalator.txt
 
-    ECHO :: To reset this file - delete and run launcher again.>settings-absinthe.txt
-    ECHO ::>>settings-absinthe.txt
-    ECHO :: Minecraft version below - example: MINECRAFT=1.18.2 >>settings-absinthe.txt
-    ECHO SET MINECRAFT=!MINECRAFT!>>settings-absinthe.txt
-    ECHO ::>>settings-absinthe.txt
-    ECHO :: Modloader type - FORGE / NEOFORGE / FABRIC / QUILT>>settings-absinthe.txt
-    ECHO SET MODLOADER=!MODLOADER!>>settings-absinthe.txt
-    ECHO ::>>settings-absinthe.txt
-    ECHO :: Enter the version number of the modloader type set above>>settings-absinthe.txt
-    IF /I !MODLOADER!==FORGE ECHO SET MODLOADERVERSION=!FORGE!>>settings-absinthe.txt
-    IF /I !MODLOADER!==NEOFORGE ECHO SET MODLOADERVERSION=!NEOFORGE!>>settings-absinthe.txt
-    IF /I !MODLOADER!==FABRIC ECHO SET MODLOADERVERSION=!FABRICLOADER!>>settings-absinthe.txt
-    IF /I !MODLOADER!==QUILT ECHO SET MODLOADERVERSION=!QUILTLOADER!>>settings-absinthe.txt
-    IF /I !MODLOADER!==VANILLA ECHO SET MODLOADERVERSION=>>settings-absinthe.txt
-    ECHO ::>>settings-absinthe.txt
-    ECHO :: Java version below - MUST BE 8, 11, 16, 17, 18, or 19 >>settings-absinthe.txt
-    ECHO SET JAVAVERSION=!JAVAVERSION!>>settings-absinthe.txt
-    ECHO ::>>settings-absinthe.txt
-    ECHO :: Ram maximum value in gigabytes - example: 6 >>settings-absinthe.txt
-    ECHO SET MAXRAMGIGS=!MAXRAMGIGS!>>settings-absinthe.txt
-    ECHO ::>>settings-absinthe.txt
-    ECHO :: Java additional startup args - DO NOT INCLUDE -Xmx THAT IS ABOVE ENTRY>>settings-absinthe.txt
-    ECHO SET ARGS=!ARGS!>>settings-absinthe.txt
-    ECHO ::>>settings-absinthe.txt
-    ECHO :: Whether or not the next settings menu entry done asks to scan for client only mods>>settings-absinthe.txt
-    ECHO SET ASKMODSCHECK=!ASKMODSCHECK!>>settings-absinthe.txt
+    ECHO :: To reset this file - delete and run launcher again.>settings-universalator.txt
+    ECHO ::>>settings-universalator.txt
+    ECHO :: Minecraft version below - example: MINECRAFT=1.18.2 >>settings-universalator.txt
+    ECHO SET MINECRAFT=!MINECRAFT!>>settings-universalator.txt
+    ECHO ::>>settings-universalator.txt
+    ECHO :: Modloader type - FORGE / NEOFORGE / FABRIC / QUILT>>settings-universalator.txt
+    ECHO SET MODLOADER=!MODLOADER!>>settings-universalator.txt
+    ECHO ::>>settings-universalator.txt
+    ECHO :: Enter the version number of the modloader type set above>>settings-universalator.txt
+    IF /I !MODLOADER!==FORGE ECHO SET MODLOADERVERSION=!FORGE!>>settings-universalator.txt
+    IF /I !MODLOADER!==NEOFORGE ECHO SET MODLOADERVERSION=!NEOFORGE!>>settings-universalator.txt
+    IF /I !MODLOADER!==FABRIC ECHO SET MODLOADERVERSION=!FABRICLOADER!>>settings-universalator.txt
+    IF /I !MODLOADER!==QUILT ECHO SET MODLOADERVERSION=!QUILTLOADER!>>settings-universalator.txt
+    IF /I !MODLOADER!==VANILLA ECHO SET MODLOADERVERSION=>>settings-universalator.txt
+    ECHO ::>>settings-universalator.txt
+    ECHO :: Java version below - MUST BE 8, 11, 16, 17, 18, or 19 >>settings-universalator.txt
+    ECHO SET JAVAVERSION=!JAVAVERSION!>>settings-universalator.txt
+    ECHO ::>>settings-universalator.txt
+    ECHO :: Ram maximum value in gigabytes - example: 6 >>settings-universalator.txt
+    ECHO SET MAXRAMGIGS=!MAXRAMGIGS!>>settings-universalator.txt
+    ECHO ::>>settings-universalator.txt
+    ECHO :: Java additional startup args - DO NOT INCLUDE -Xmx THAT IS ABOVE ENTRY>>settings-universalator.txt
+    ECHO SET ARGS=!ARGS!>>settings-universalator.txt
+    ECHO ::>>settings-universalator.txt
+    ECHO :: Whether or not the next settings menu entry done asks to scan for client only mods>>settings-universalator.txt
+    ECHO SET ASKMODSCHECK=!ASKMODSCHECK!>>settings-universalator.txt
 
 :: Returns to main menu if menu option was only to enter java or ram values
 IF /I !MAINMENU!==J GOTO :mainmenu
@@ -1223,16 +1244,16 @@ IF /I !MAINMENU!==S IF /I !ASKMODSCHECK!==Y (
 
 ::Stores values in variables depending on Java version entered
 IF !JAVAVERSION!==8 (
-    SET JAVAFILENAME="jdk8u382-b05/OpenJDK8U-jre_x64_windows_hotspot_8u382b05.zip"
-    SET JAVAFOLDER="univ-utils\java\jdk8u382-b05-jre\."
-    SET checksumeight=976068897ed670ff775f14227982a71af88dfdeee03f9070f7c75356c2c05890
-    SET JAVAFILE="univ-utils\java\jdk8u382-b05-jre\bin\java.exe"
+    SET JAVAFILENAME="jdk8u392-b08/OpenJDK8U-jre_x64_windows_hotspot_8u392b08.zip"
+    SET JAVAFOLDER="univ-utils\java\jdk8u392-b08-jre\."
+    SET checksumeight=a6b7e671cc12f9fc16db59419bda8be00da037e14aaf5d5afb78042c145b76ed
+    SET JAVAFILE="univ-utils\java\jdk8u392-b08-jre\bin\java.exe"
 )
 IF !JAVAVERSION!==11 (
-    SET JAVAFILENAME="jdk-11.0.20%%2B8/OpenJDK11U-jre_x64_windows_hotspot_11.0.20_8.zip"
-    SET JAVAFOLDER="univ-utils\java\jdk-11.0.20+8-jre\."
-    SET checksumeight=06b88b61d85d069483d22ff4b0b8dbdfdb321bd55d8bbfe8e847980a2586b714
-    SET JAVAFILE="univ-utils\java\jdk-11.0.20+8-jre\bin\java.exe"
+    SET JAVAFILENAME="jdk-11.0.21%%2B9/OpenJDK11U-jre_x64_windows_hotspot_11.0.21_9.zip"
+    SET JAVAFOLDER="univ-utils\java\jdk-11.0.21+9-jre\."
+    SET checksumeight=a93d8334a85f6cbb228694346aad0353a8cb9ff3c84b5dc3221daf2c54a11e54
+    SET JAVAFILE="univ-utils\java\jdk-11.0.21+9-jre\bin\java.exe"
 )
 IF !JAVAVERSION!==16 (
     SET JAVAFILENAME="jdk-16.0.2%%2B7/OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip"
@@ -1241,10 +1262,10 @@ IF !JAVAVERSION!==16 (
     SET JAVAFILE="univ-utils\java\jdk-16.0.2+7\bin\java.exe"
 )
 IF !JAVAVERSION!==17 (
-    SET JAVAFILENAME="jdk-17.0.8%%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip"
-    SET JAVAFOLDER="univ-utils\java\jdk-17.0.8+7-jre\."
-    SET checksumeight=216aa7d4db4bd389b8e3d3b4f1a58863666c37c58b0a83e1c744620675312e36
-    SET JAVAFILE="univ-utils\java\jdk-17.0.8+7-jre\bin\java.exe"
+    SET JAVAFILENAME="jdk-17.0.9%%2B9.1/OpenJDK17U-jre_x64_windows_hotspot_17.0.9_9.zip"
+    SET JAVAFOLDER="univ-utils\java\jdk-17.0.9+9-jre\."
+    SET checksumeight=6c491d6f8c28c6f451f08110a30348696a04b009f8c58592191046e0fab1477b
+    SET JAVAFILE="univ-utils\java\jdk-17.0.9+9-jre\bin\java.exe"
 )
 IF !JAVAVERSION!==18 (
     SET JAVAFILENAME="jdk-18.0.2.1%%2B1/OpenJDK18U-jre_x64_windows_hotspot_18.0.2.1_1.zip"
@@ -1342,7 +1363,7 @@ IF EXIST %JAVAFOLDER% (
   ECHO:
 ) ELSE (
   ECHO UH-OH - JAVA folder not detected.
-  ECHO Perhaps try resetting all files, delete settings-absinthe.txt and starting over.
+  ECHO Perhaps try resetting all files, delete settings-universalator.txt and starting over.
   PAUSE && EXIT [\B]
 )
 
@@ -1359,7 +1380,8 @@ IF /I !MODLOADER!==VANILLA GOTO :preparevanilla
 :detectforge
 CLS
 :: Checks to see if the specific JAR file or libraries folder exists for this modloader & version.  If found we'll assume it's installed correctly and move to the foundforge label.
-IF /I !MODLOADER!==NEOFORGE IF EXIST libraries/net/neoforged/forge/!MINECRAFT!-!NEOFORGE!/. GOTO :foundforge
+IF /I !MODLOADER!==NEOFORGE IF !MINECRAFT!==1.20.1 IF EXIST libraries/net/neoforged/forge/!MINECRAFT!-!NEOFORGE!/. GOTO :foundforge
+IF /I !MODLOADER!==NEOFORGE IF !MINECRAFT! NEQ 1.20.1 IF EXIST libraries/net/neoforged/neoforge/!MINECRAFT!-!NEOFORGE!/. GOTO :foundforge
 
 IF /I !MODLOADER!==FORGE (
   IF EXIST libraries/net/minecraftforge/forge/!MINECRAFT!-!FORGE!/. GOTO :foundforge
@@ -1423,9 +1445,11 @@ IF /I !MODLOADER!==FORGE (
 :downloadneoforge
 IF /I !MODLOADER!==NEOFORGE (
   ECHO   Downloading !MINECRAFT! - Neoforge - !NEOFORGE! installer file!
-  curl -sLfo forge-installer.jar https://maven.neoforged.net/releases/net/neoforged/forge/!MINECRAFT!-!NEOFORGE!/forge-!MINECRAFT!-!NEOFORGE!-installer.jar >nul 2>&1
+  IF !MINECRAFT!==1.20.1 curl -sLfo forge-installer.jar https://maven.neoforged.net/releases/net/neoforged/forge/!MINECRAFT!-!NEOFORGE!/forge-!MINECRAFT!-!NEOFORGE!-installer.jar >nul 2>&1
+  IF !MINECRAFT! NEQ 1.20.1 curl -sLfo forge-installer.jar https://maven.neoforged.net/releases/net/neoforged/neoforge/!NEOFORGE!/neoforge-!NEOFORGE!-installer.jar >nul 2>&1
   IF NOT EXIST forge-installer.jar (
-    powershell -Command "(New-Object Net.WebClient).DownloadFile('https://maven.neoforged.net/releases/net/neoforged/forge/!MINECRAFT!-!NEOFORGE!/forge-!MINECRAFT!-!NEOFORGE!-installer.jar', 'forge-installer.jar')" >nul 2>&1
+    IF !MINECRAFT!==1.20.1 powershell -Command "(New-Object Net.WebClient).DownloadFile('https://maven.neoforged.net/releases/net/neoforged/forge/!MINECRAFT!-!NEOFORGE!/forge-!MINECRAFT!-!NEOFORGE!-installer.jar', 'forge-installer.jar')" >nul 2>&1
+    IF !MINECRAFT! NEQ 1.20.1 powershell -Command "(New-Object Net.WebClient).DownloadFile('https://maven.neoforged.net/releases/net/neoforged/neoforge/!NEOFORGE!/neoforge-!NEOFORGE!-installer.jar', 'forge-installer.jar')" >nul 2>&1
   )
 )
 
@@ -1518,7 +1542,7 @@ IF NOT EXIST "%HERE%\mods" GOTO :mainmenu
   ECHO       --MANY CLIENT MODS ARE NOT CODED TO SELF DISABLE ON SERVERS AND MAY CRASH THEM && ECHO:
   ECHO       --THE UNIVERSALATOR SCRIPT CAN SCAN THE MODS FOLDER AND SEE IF ANY ARE PRESENT && ECHO:
   ECHO         For an explanation of how the script scans files - visit the official wiki at:
-  ECHO         https://github.com/nanonestor/absinthe/wiki
+  ECHO         https://github.com/nanonestor/universalator/wiki
   ECHO:
   ECHO   %yellow% CLIENT MOD SCANNING - CLIENT MOD SCANNING %blue% && ECHO:
   ECHO:
@@ -1576,7 +1600,7 @@ IF EXIST univ-utils\allmodidsandfiles.txt DEL univ-utils\allmodidsandfiles.txt
 
   REM Gets the client only list from github file, checks if it's empty or not after download attempt, then sends
   REM to a new file masterclientids.txt with any blank lines removed.
-  powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/CelestialAbyss/absinthe/main/clientonlymods.txt', 'univ-utils/clientonlymods.txt')" >nul
+  powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/nanonestor/utilities/main/clientonlymods.txt', 'univ-utils/clientonlymods.txt')" >nul
 
 
   REM Checks if the just downloaded file's first line is empty or not.  Better never save that webfile with the first line empty!
@@ -1589,7 +1613,7 @@ IF EXIST univ-utils\allmodidsandfiles.txt DEL univ-utils\allmodidsandfiles.txt
     ECHO   SOMETHING WENT WRONG DOWNLOADING THE MASTER CLIENT-ONLY LIST FROM THE GITHUB HOSTED LIST
     ECHO   CHECK THAT YOU HAVE NO ANTIVIRUS PROGRAM OR WINDOWS DEFENDER BLOCKING THE DOWNLOAD FROM -
     ECHO:
-    ECHO   https://raw.githubusercontent.com/CelestialAbyss/absinthe/main/clientonlymods.txt
+    ECHO   https://raw.githubusercontent.com/nanonestor/utilities/main/clientonlymods.txt
     ECHO:
     PAUSE && EXIT [\B]
   )
@@ -1620,7 +1644,7 @@ FOR /L %%T IN (0,1,!SERVERMODSCOUNT!) DO (
    IF !ERRORLEVEL!==0 FOR /F "delims=" %%X IN ('tar -xOf "mods\!SERVERMODS[%%T].file!" *\mods.toml') DO (
     
       SET "TEMP=%%X"
-      IF !FOUNDMODPLACE!==Y (
+      IF !FOUNDMODPLACE!==Y IF "!TEMP!" NEQ "!TEMP:modId=x!" (
          SET "TEMP=!TEMP: =!"
          SET "TEMP=!TEMP:#mandatory=!"
          :: CALLs a special function to replace equals with underscore characters for easier detection.
@@ -1694,30 +1718,31 @@ FOR /L %%t IN (0,1,!SERVERMODSCOUNT!) DO (
 :: END SCANNING OLD STYLE MCMOD.INFO
 :finishedscan
 
-IF EXIST univ-utils\allmodidsandfiles.txt DEL univ-utils\allmodidsandfiles.txt >nul 2>&1
 
-:: Enters all modIds and corresponding file names to a single txt file for FINDSTR comparison with client mod list.
-
-FOR /L %%b IN (0,1,!SERVERMODSCOUNT!) DO (
-  ECHO !SERVERMODS[%%b].id!;!SERVERMODS[%%b].file! >>univ-utils\allmodidsandfiles.txt
-)
-:: FINDSTR compares each line of the client only mods list to the list containing all found modIds and returns only lines with matches.
-ver >nul
-FINDSTR /b /g:univ-utils\clientonlymods.txt univ-utils\allmodidsandfiles.txt>univ-utils\foundclients.txt
-SORT univ-utils\foundclients.txt
-ECHO zzdummyzz>>univ-utils\foundclients.txt
-
-:: Loops/Reads through the foundclients.txt and enters values into an array.
+:: This is it! Checking each server modid versus the client only mods list text file.  Starts with a loop through each server modID found.
 SET /a NUMCLIENTS=0
-FOR /F "tokens=1,2 delims=;" %%b IN (univ-utils\foundclients.txt) DO (
-   SET FOUNDCLIENTS[!NUMCLIENTS!].id=%%b
-   SET FOUNDCLIENTS[!NUMCLIENTS!].file=%%c
-   SET /a NUMCLIENTS+=1
+FOR /L %%b IN (0,1,!SERVERMODSCOUNT!) DO (
+
+  :: Runs a FINDSTR to see if the string of the modID is found on a line.  This needs further checks to guarantee the modID is the entire line and not just part of it.
+  FINDSTR /R /C:"!SERVERMODS[%%b].id!" univ-utils\clientonlymods.txt >nul
+
+  REM If errorlevel is 0 then the FINDSTR above found the modID.  The line returned by the FINDSTR can be captured into a variable by using a FOR loop.
+  REM That variable is compared to the server modID in question.  If they are equal then it is a definite match and the modID and filename are recorded to a list of client only mods found.
+  IF !ERRORLEVEL!==0 (
+    FOR /F "delims=" %%A IN ('FINDSTR /R /C:"!SERVERMODS[%%b].id!" univ-utils\clientonlymods.txt') DO (
+
+      IF !SERVERMODS[%%b].id!==%%A (
+        SET /a NUMCLIENTS+=1
+        SET FOUNDCLIENTS[!NUMCLIENTS!].id=!SERVERMODS[%%b].id!
+        SET FOUNDCLIENTS[!NUMCLIENTS!].file=!SERVERMODS[%%b].file!
+      )
+    )
+  )
 )
 
 :: If foundclients.txt isn't found then assume none were found and GOTO section stating none found.
 REM IF NOT EXIST univ-utils\foundclients.txt GOTO :noclients
-IF !FOUNDCLIENTS[0].id!==zzdummyzz GOTO :noclients
+IF !NUMCLIENTS!==0 GOTO :noclients
 
   :: Prints report to user - showing client mod file names and corresponding modid's.
   CLS
@@ -1732,26 +1757,18 @@ IF !FOUNDCLIENTS[0].id!==zzdummyzz GOTO :noclients
   ECHO:
   ECHO    ------------------------------------------------------
 
-:: Corrects the number of found client mods to remove dummy entries
-SET NEWNUMCLIENTS=!NUMCLIENTS!
-FOR /L %%R IN (0,1,!NUMCLIENTS!) DO (
-	IF "!FOUNDCLIENTS[%%R].id!" NEQ "!FOUNDCLIENTS[%%R].id:zzdummyzz=z!" (
-    SET /a NEWNUMCLIENTS-=1
-  )
-)
-SET NUMCLIENTS=!NEWNUMCLIENTS!
 
 :: The purpose of the following code is to echo the modIDs and filenames to view but do so with auto-formatted columns depending on the maximum size of the modID.
 :: It determines this first entry column width with a funciton.
 
 :: First iterate through the list to find the length of the longest modID string
 SET COLUMNWIDTH=0
-FOR /L %%p IN (0,1,!NUMCLIENTS!) DO (
+FOR /L %%p IN (1,1,!NUMCLIENTS!) DO (
 	CALL :GetMaxStringLength COLUMNWIDTH "!FOUNDCLIENTS[%%p].id!"
 )
 :: The equal sign is followed by 80 spaces and a doublequote
 SET "EightySpaces=                                                                                "
-FOR /L %%D IN (0,1,!NUMCLIENTS!) DO (
+FOR /L %%D IN (1,1,!NUMCLIENTS!) DO (
 	:: Append 80 spaces after the modID value
 	SET "Column=!FOUNDCLIENTS[%%D].id!%EightySpaces%"
 	:: Chop at maximum column width, using a FOR loop as a kind of "super delayed" variable expansion
@@ -1791,7 +1808,7 @@ GOTO:EOF
   ECHO: & ECHO:
   ECHO      - IF YOU THINK THE CURRENT MASTER LIST IS INNACURATE OR HAVE FOUND A MOD TO ADD -
   ECHO         PLEASE CONTACT THE LAUNCHER AUTHOR OR
-  ECHO         FILE AN ISSUE AT https://github.com/CelestialAbyss/absinthe/issues !
+  ECHO         FILE AN ISSUE AT https://github.com/nanonestor/universalator/issues !
   ECHO:
   :typo
   ECHO    ------------------------------------------------------ & ECHO:
@@ -1811,7 +1828,7 @@ GOTO:EOF
   CLS
   ECHO:
   ECHO:
-  FOR /L %%L IN (0,1,%NUMCLIENTS%) DO (
+  FOR /L %%L IN (1,1,!NUMCLIENTS!) DO (
     IF DEFINED FOUNDCLIENTS[%%L].file (
       MOVE "%HERE%\mods\!FOUNDCLIENTS[%%L].file!" "%HERE%\CLIENTMODS\!FOUNDCLIENTS[%%L].file!" >nul 2>&1
       ECHO   MOVED - !FOUNDCLIENTS[%%L].file!
@@ -1849,7 +1866,7 @@ GOTO :mainmenu
 
 CLS
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ECHO            %yellow%   Absinthe - Server launcher script    %blue%
+ECHO            %yellow%   Universalator - Server launcher script    %blue%
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ECHO   %yellow% READY TO LAUNCH !MODLOADER! SERVER! %blue%
 ECHO:
@@ -1895,7 +1912,7 @@ ECHO: && ECHO   Launching... && ping -n 2 127.0.0.1 > nul && ECHO   Launching.. 
 :: Starts forge depending on what java version is set.  Only correct combinations will launch - others will crash.
 
 IF !OVERRIDE!==Y SET "JAVAFILE=java"
-TITLE Absinthe - !MINECRAFT! !MODLOADER!
+TITLE Universalator - !MINECRAFT! !MODLOADER!
 ver >nul
 IF /I !MODLOADER!==NEOFORGE GOTO :actuallylaunchneoforge
 :: Special case forge.jar filenames for older OLD versions
@@ -1931,7 +1948,8 @@ IF !MCMAJOR! GEQ 17 (
 
 :actuallylaunchneoforge
 IF /I !MODLOADER!==NEOFORGE (
-  %JAVAFILE% !MAXRAM! %ARGS% %OTHERARGS% @libraries/net/neoforged/forge/!MINECRAFT!-!NEOFORGE!/win_args.txt nogui %*
+  IF !MINECRAFT!==1.20.1 %JAVAFILE% !MAXRAM! %ARGS% %OTHERARGS% @libraries/net/neoforged/forge/!MINECRAFT!-!NEOFORGE!/win_args.txt nogui %*
+  IF !MINECRAFT! NEQ 1.20.1 %JAVAFILE% !MAXRAM! %ARGS% %OTHERARGS% @libraries/net/neoforged/neoforge/!NEOFORGE!/win_args.txt nogui %*
 )
 
 :: Complaints to report in console output if launch attempt crashes
@@ -2510,7 +2528,7 @@ GOTO :quilteula
 :launchquilt
 CLS
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ECHO            %yellow%   Absinthe - Server launcher script    %blue%
+ECHO            %yellow%   Universalator - Server launcher script    %blue%
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ECHO:
 ECHO   %yellow% READY TO LAUNCH !MODLOADER! SERVER! %blue%
@@ -2553,7 +2571,7 @@ IF /I !FABRICLAUNCH!==M GOTO :mainmenu
 ECHO: && ECHO   Launching... && ping -n 2 127.0.0.1 > nul && ECHO   Launching.. && ping -n 2 127.0.0.1 > nul && ECHO   Launching. && ECHO:
 
 IF !OVERRIDE!==Y SET "JAVAFILE=java"
-TITLE Absinthe - !MINECRAFT! !MODLOADER!
+TITLE Universalator - !MINECRAFT! !MODLOADER!
 
 :: Actually launch the server!
 IF /I !MODLOADER!==FABRIC (
@@ -2628,12 +2646,12 @@ ECHO   2- UPnP CAN BE USED IF YOU HAVE A COMPATIBLE NETWORK ROUTER WITH UPnP SET
 ECHO        UPnP is a connection method with which networked computers can open ports on network routers.
 ECHO        Not all routers have UPnP - and if yours does it needs to be enabled in settings  - it often is by default.
 ECHO: && ECHO:
-ECHO        For personal preference the tool used by the Absinthe to do UPnP functions - MiniUPnP - is not downloaded
+ECHO        For personal preference the tool used by the Universalator to do UPnP functions - MiniUPnP - is not downloaded
 ECHO        by default.  To check if your router can use UPnP, and use it for setting up port forwarding - you can
-ECHO        enter %yellow% DOWNLOAD %blue% to get the file and enable Absinthe script UPnP functions.
+ECHO        enter %yellow% DOWNLOAD %blue% to get the file and enable Universalator script UPnP functions.
 ECHO: && ECHO:
 ECHO      %yellow% FOR MORE INFORMATION ON PORT FORWARDING AND UPnP - VISIT THE UNIVERSALATOR WIKI AT: %blue%
-ECHO      %yellow% https://github.com/nanonestor/absinthe/wiki                                    %blue%
+ECHO      %yellow% https://github.com/nanonestor/universalator/wiki                                    %blue%
 ECHO: && ECHO   ENTER YOUR SELECTION && ECHO      %green% 'DOWNLOAD' - Download UPnP Program %blue% && ECHO      %green% 'M' - Main Menu %blue%
 )
 
@@ -2706,7 +2724,7 @@ IF !FOUNDVALIDUPNP!==N (
     ECHO   FOR INSRUCTIONS YOU CAN WEB SEARCH PORT FORWARDING MINECRAFT SERVERS
     ECHO   OR
     ECHO   VISIT THE UNIVERSALATOR WIKI AT:
-    ECHO   https://github.com/nanonestor/absinthe/wiki
+    ECHO   https://github.com/nanonestor/universalator/wiki
     ECHO: && ECHO:
     PAUSE
     GOTO :upnpmenu
